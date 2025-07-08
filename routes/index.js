@@ -8,6 +8,19 @@ const upload = require("../middlewares/upload");
 const NotFoundError = require("../utils/errorclasses/NotFoundError");
 const auth = require("../middlewares/auth.js");
 
+router.get('/', (req, res) => {
+    res.status(200).json({
+        message: "Welcome to the Packly Backend API!",
+        status: "API is running",
+        version: "1.0", 
+        availableEndpoints: {
+            clothingItems: '/clothing-items', 
+            users: '/users',
+            packingLists: '/profile/packing-lists',
+            weather: '/weater',
+        }
+    })
+});
 
 router.use("/clothing-items", clothingItemRouter);
 router.use("/clothing-items", likeRouter);
