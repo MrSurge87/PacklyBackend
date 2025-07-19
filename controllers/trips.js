@@ -209,7 +209,7 @@ const getTripById = async (req, res, next) => {
     if (packingListId) {
       const itemsResult = await pool.query(
         `SELECT
-            item_name AS name,
+            name,
             quantity,
             is_checked,
             category
