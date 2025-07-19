@@ -9,11 +9,13 @@ const UnauthorizedError = require("../utils/errorclasses/UnauthorizedError");
 const ForbiddenError = require("../utils/errorclasses/ForbiddenError");
 const NotFoundError = require("../utils/errorclasses/NotFoundError");
 
+const JWT_SECRET = process.env.JWT_TOKEN;
+
 const createUser = async (req, res, next) => {
   const { name, avatar, email, password, location } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    await pool.query(
+    const newUserResult = await pool.query(
       `INSERT INTO users (
       name, 
       email, 
@@ -21,10 +23,28 @@ const createUser = async (req, res, next) => {
       password, 
       location
       ) 
-      VALUES ($1, $2, $3, $4, $5);`,
+      VALUES ($1, $2, $3, $4, $5) 
+      RETURNING id, name, email, image_filepath, location;`,
       [name, email, avatar || null, hashedPassword, location || null]
     );
-    return res.status(created).send({ message: "Account creation successful" });
+
+    const newUser = newUserResult.rows[0];
+
+    const token = jwt.sign(
+      {_id: newUser.id, username: newUser.name, email: newUser.email},
+      JWT_SECRET,
+      { expiresIn: '1h'}
+    );
+    return res.status(created).send({ message: "Account creation successful and logged in.",
+      token: token,
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        avatar: newUser.image_filepath,
+        location: newUser.location
+      }
+     });
   } catch (err) {
     if (err.code === "23505") {
       return next(
