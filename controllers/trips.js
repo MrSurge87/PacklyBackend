@@ -217,7 +217,7 @@ const getTripById = async (req, res, next) => {
             packing_list_items
          WHERE
             packing_list_id = $1
-         ORDER BY id;`, // Optional: add an order by clause if you want consistent order
+         ORDER BY category, name;`, // Optional: add an order by clause if you want consistent order
         [packingListId]
       );
 
